@@ -1,8 +1,12 @@
-import ShareThisModal from "./ShareThis";
+import ShareThisModal from "./ShareThisModal";
 import { ShareIcon } from "@heroicons/react/solid";
 import { useState, useEffect, useReducer } from "react";
 
-const Header = () => {
+interface HeaderProps {
+    shareThis: () => void;
+
+}
+const Header = ({shareThis}:HeaderProps) => {
     const [open, setOpen] = useState<boolean>(false);
     const [name, setName] = useState("");
 
@@ -33,7 +37,7 @@ const Header = () => {
         <button
           type="button"
           className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          onClick={()=> setOpen(true)}
+          onClick={()=> shareThis()}
         >
           <ShareIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" />
           Share This with Others

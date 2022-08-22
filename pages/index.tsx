@@ -2,52 +2,29 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import styles from "../styles/Home.module.css";
-import { useState, useEffect, useReducer } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabase";
 import { RealtimeChannel } from "@supabase/supabase-js";
 import { useRouter } from "next/router";
-import OrderItemCard, {IOrderItem} from "../components/OrderItemCard";
-import MenuItemCard, {IMenuItem} from "../components/MenuItemCard";
+import OrderItemCard, { IOrderItem } from "../components/OrderItemCard";
+import MenuItemCard, { IMenuItem } from "../components/MenuItemCard";
 import Header from "../components/header";
 
-
 enum OrderActionKind {
-  ADD = 'ADD',
-  DELETE = 'REMOVE',
+  ADD = "ADD",
+  DELETE = "REMOVE",
 }
 
 interface OrderAction {
   type: OrderActionKind;
-  
 }
 
-const reducer = (order:IOrderItem[], action:OrderAction) => {
-  switch (action.type) {
-    case "ADD": {
-      const modal: IOrderItem = {
-        id: 1,
-    orderid: 11,
-    quantity: 1,
-    name: 'str',
-    };return [...order, modal];
-    }
-      
-    case 'REMOVE':
-          //setOrder((existingItem) => [...existingItem, orderItem]);
-
-    default:
-      return order;
-  }
-};
 const Home: NextPage = () => {
-
   const [menu, setMenu] = useState<IMenuItem[]>([]);
-  //const [order, setOrder] = useState<IOrderItem[]>([]);
-  const [channel, setChannel] = useState<RealtimeChannel>();
-  const [dname, setdname] = useState<string>("dname");
-  const [users, setUsres] = useState<string[]>([]);
+  const [order, setOrder] = useState<IOrderItem[]>([]);
   const router = useRouter();
-  const [order, dispatch] = useReducer(reducer, []);
+  //var channel: RealtimeChannel;
+  const channelRef = useRef<RealtimeChannel| null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,23 +36,19 @@ const Home: NextPage = () => {
 
     fetchData();
   }, []);
-  const presenceChanged = () => {
-    const newState = channel?.presenceState();
-    dispatch({ type: OrderActionKind.ADD });
 
-    console.log("changed", newState, "channel", channel, " dname", dname);
-  };
+ 
 
   function addOrderItem(orderItem: IOrderItem) {
-    dispatch({ type: OrderActionKind.ADD });
+    console.log('inside add ', channelRef.current, 'order ', order);
+    channelRef.current?.track({ order: "new value" });
 
-    //setOrder((existingItem) => [...existingItem, orderItem]);
+
+    setOrder((existingItem) => [...existingItem, orderItem]);
   }
 
   function removeOrderItem(id: number) {
-    //setOrder(order.filter((item) => item.id !== id));
-    dispatch({ type: OrderActionKind.DELETE});
-
+    setOrder(order.filter((item) => item.id !== id));
   }
 
   const handleCheckoutOrder = (e: any) => {
@@ -83,31 +56,36 @@ const Home: NextPage = () => {
     router.push("/CheckoutOrder");
   };
 
+  const presenceChanged = () => {
+    const newState = channelRef.current?.presenceState();
 
+
+    console.log("changed", newState, "channel", channelRef.current);
+  };
   function shareThis() {
-
     // Generate random number
     //Math.floor(Math.random()*100000+1)
-    
-    const tchannel = supabase.channel("room2", {
+    console.log("share this");
+    const channel = supabase.channel("room23", {
       configs: {
         broadcast: { ack: true },
         presence: { key: "121" },
       },
     });
 
-    tchannel
+    channel
       .on("presence", { event: "sync" }, () => presenceChanged())
+      .on("presence", { event: "join" }, ({ newUser }: any) => {
+        console.log("a new user has joined", newUser);
+      })
+      .on("presence", { event: "leave" }, ({ leftUser }: any) =>
+        console.log("a user has left", leftUser)
+      )
       .subscribe((status: string) => {
         if (status === "SUBSCRIBED") {
-          //channel.track({ user_name: 'user123'})
-          console.log("subscribed ", status);
-
-          setChannel(tchannel);
-          setdname("Meera");
-
-          console.log("name", name, "channel ", tchannel, "dname", dname);
-          tchannel?.track({ user_name: name });
+          channel.track({ order: JSON.stringify(order) });
+          channelRef.current = channel; 
+          console.log("subscribed ", status, "json", JSON.stringify(order));
         }
         console.log("status ", status);
       });
@@ -126,12 +104,11 @@ const Home: NextPage = () => {
 
       <main>
         {/* // Header  */}
-        
-        <Header/>
-              
 
-        <div className="flex flex-row"> 
-         {/* // Menu  */}
+        <Header shareThis={() => shareThis()} />
+
+        <div className="flex flex-row">
+          {/* // Menu  */}
           <div className="basis-3/4 bg-slate-50	">
             {menu.map((menuItem: IMenuItem) => (
               <MenuItemCard
@@ -142,14 +119,13 @@ const Home: NextPage = () => {
             ))}
           </div>
 
-
-                   {/* // Selected Items  */}
+          {/* // Selected Items  */}
 
           <div className="basis-1/4 bg-slate-200">
             <h1> Current Order Items</h1>
-            {order.map((orderItem: IOrderItem) => (
+            {order.map((orderItem: IOrderItem, index) => (
               <OrderItemCard
-                key={orderItem.id}
+                key={index}
                 {...orderItem}
                 removeOrderItem={removeOrderItem}
               />
