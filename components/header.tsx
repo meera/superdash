@@ -16,7 +16,7 @@ const Header = ({shareThis}:HeaderProps) => {
       <div className="bg-slate-200">
         <h1 className="text-3xl font-bold underline">Welcome to SuperDash!</h1>
         <p> This is a Food Delivery System - Just like Doordash with a Collaborative Ordering.</p>
-        <a href="https://github.com">
+        <a href="https://github.com/meera/superdash">
           <img
             src="/GitHub-Mark-64px.png"
             alt="github logo"
