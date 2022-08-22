@@ -22,7 +22,7 @@ const MenuItemCard = ({ id, name, image, addOrderItem }: MenuItemCardProps) => {
     return (
       <div className="border border-neutral-300	 rounded">
         <span>{name}</span>
-        <img src={image} alt="github logo" width="150px" height="50px" />
+        <img src={image!} alt="github logo" width="150px" height="50px" />
         <span className="inline-flex ">
           <span> Quantity: </span>
           <ArrowCircleDownIcon
