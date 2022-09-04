@@ -9,6 +9,7 @@ export interface IMenuItem {
     name: string | null;
     description: string | null;
     image: string | null;
+    price: number
   }
   
 export interface MenuItemCardProps extends IMenuItem {
@@ -16,7 +17,7 @@ export interface MenuItemCardProps extends IMenuItem {
   }
   
 
-const MenuItemCard = ({ id, name, image, addOrderItem }: MenuItemCardProps) => {
+const MenuItemCard = ({ id, name, image, price, addOrderItem }: MenuItemCardProps) => {
     const [quantity, setQuantity] = useState<number>(1);
   
     return (
@@ -39,7 +40,7 @@ const MenuItemCard = ({ id, name, image, addOrderItem }: MenuItemCardProps) => {
         <button
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
           onClick={() => {
-            const orderItem: IOrderItem = { id, name, quantity };
+            const orderItem: IOrderItem = { id, name, quantity, price};
             addOrderItem(orderItem);
           }}
         >

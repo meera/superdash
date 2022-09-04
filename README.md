@@ -9,6 +9,7 @@ All users will see each others food order - and can collaborate on picking up fo
 Once everybody is done, you can place the order.
 
 
+This hackathon coincided with my quaratine days due to Covid. 
 ## Getting Started
 
 First, run the development server:

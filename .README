@@ -1,0 +1,3 @@
+yarn add -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+supabase gen types typescript --db-url postgresql://postgres:harihar12ka4@db.mgcqzjogxbkdfqvivknd.supabase.co:5432/postgres > supabase.types.ts
