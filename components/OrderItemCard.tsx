@@ -1,3 +1,4 @@
+import Image from 'next/image'
 
 export interface IOrderItem {
   id: number;
@@ -28,9 +29,9 @@ export interface OrderItemCardProps extends IOrderItem {
 
          <li className="flex py-6 px-4 sm:px-6">
                     <div className="flex-shrink-0">
-                      <img
-                        src={image}
-                        alt={name}
+                      <Image
+                        src={image || 'https://placeolder'}
+                        alt={name || 'PlaceHolder'}
                         className="w-20 rounded-md"
                       />
                     </div>

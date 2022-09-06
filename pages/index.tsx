@@ -7,13 +7,10 @@ import { RealtimeChannel, RealtimePresence } from "@supabase/supabase-js";
 import { useRouter } from "next/router";
 import { IMenuItem } from "../components/MenuItemCard";
 import { GetStaticProps } from "next";
-import type { NextPage } from "next";
 import Head from "next/head";
 import ShareThisModal from "../components/ShareThisModal";
 import Avatar from "../components/Avatar";
 import InviteFriends from "../components/InviteFriends";
-import ActiveFriends from "../components/ActiveFriends";
-import { IOrder } from "../components/Order";
 import {IActiveFriends} from '../types';
 
 //https://github.com/supabase/realtime/blob/multiplayer/demo/pages/%5B...slug%5D.tsx
@@ -32,7 +29,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
   };
 };
 
-const Home: React.FC = ({ menuItems }) => {
+const Home: React.FC = ({ menuItems} :any) => {
   const [order, setOrder] = useState<IOrderItem[]>([]);
   const router = useRouter();
   //var channel: RealtimeChannel;
@@ -82,7 +79,7 @@ const Home: React.FC = ({ menuItems }) => {
     return () => {
       channel.unsubscribe();
     };
-  }, []);
+  }, [user]);
 
   function addOrderItem(orderItem: IOrderItem) {
     console.log("inside add ", channelRef.current, "order ", order);

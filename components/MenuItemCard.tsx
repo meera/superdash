@@ -1,7 +1,7 @@
-import { ArrowCircleDownIcon } from "@heroicons/react/solid";
-import { ArrowCircleUpIcon } from "@heroicons/react/solid";
 import {IOrderItem} from './OrderItemCard';
 import { useState, useEffect } from "react";
+import Image from 'next/image'
+
 
 export interface IMenuItem {
     id: number;
@@ -23,7 +23,7 @@ const MenuItemCard = ({ id, name, image, price, addOrderItem }: MenuItemCardProp
     return ( <li
                     className="flex p-4 space-x-6 border-t border-gray-200 relative border rounded-lg shadow-sm flex cursor-pointer mt-4 bg-white"
                   >
-                    <img
+                    <Image
                       src="https://theburgershack.pk/upload/1652957388-WhatsApp%20Image%202022-05-19%20at%203.45.37%20PM.jpeg"
                       alt="Moss green canvas compact backpack with double top zipper, zipper front pouch, and matching carry handle and backpack straps."
                       className="flex-none w-40 h-40 object-center object-cover bg-gray-200 rounded-md"

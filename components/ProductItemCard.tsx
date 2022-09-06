@@ -1,5 +1,6 @@
 import { IOrderItem } from "./OrderItemCard";
 import { useState, useEffect } from "react";
+import Image from 'next/image'
 
 export interface IProductItem {
   id: number;
@@ -25,7 +26,7 @@ const ProductItemCard = ({
 
   return (
     <li className="flex p-4 space-x-6 border-t border-gray-200 relative border rounded-lg shadow-sm flex cursor-pointer mt-4 bg-white">
-      <img
+      <Image
         src={ image ?? "https://theburgershack.pk/upload/1652957388-WhatsApp%20Image%202022-05-19%20at%203.45.37%20PM.jpeg"}
         alt={name ?? "Food"}
         className="flex-none w-20 h-20 object-center object-cover bg-gray-200 rounded-md"
