@@ -1,13 +1,14 @@
-export interface IOrderItem {
-    id: number;
-    orderid?: number;
-    quantity: number;
-    name: string | null;
-    price: number
-    image: string | null;
 
-  }
-  
+export interface IOrderItem {
+  id: number;
+  orderid?: number;
+  quantity: number;
+  name: string | null;
+  price: number
+  image: string | null;
+
+}
+
 export interface OrderItemCardProps extends IOrderItem {
     removeOrderItem: (id: number) => void;
     

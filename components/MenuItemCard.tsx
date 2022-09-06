@@ -20,33 +20,47 @@ export interface MenuItemCardProps extends IMenuItem {
 const MenuItemCard = ({ id, name, image, price, addOrderItem }: MenuItemCardProps) => {
     const [quantity, setQuantity] = useState<number>(1);
   
-    return (
-      <div className="border border-neutral-300	 rounded">
-        <span>{name}</span>
-        <img src={image!} alt="github logo" width="150px" height="50px" />
-        <span className="inline-flex ">
-          <span> Quantity: </span>
-          <ArrowCircleDownIcon
-            onClick={() => quantity && setQuantity(quantity - 1)}
-            className="h-16 w-16 text-blue-500"
-          />
-          <span> {quantity} </span>
-  
-          <ArrowCircleUpIcon
-            onClick={() => setQuantity(quantity + 1)}
-            className="h-16 w-16 text-blue-500"
-          />
-        </span>
-        <button
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
-          onClick={() => {
-            const orderItem: IOrderItem = { id, name, quantity, price};
-            addOrderItem(orderItem);
-          }}
-        >
-          Add
-        </button>
-      </div>
+    return ( <li
+                    className="flex p-4 space-x-6 border-t border-gray-200 relative border rounded-lg shadow-sm flex cursor-pointer mt-4 bg-white"
+                  >
+                    <img
+                      src="https://theburgershack.pk/upload/1652957388-WhatsApp%20Image%202022-05-19%20at%203.45.37%20PM.jpeg"
+                      alt="Moss green canvas compact backpack with double top zipper, zipper front pouch, and matching carry handle and backpack straps."
+                      className="flex-none w-40 h-40 object-center object-cover bg-gray-200 rounded-md"
+                    />
+                    <div className="flex flex-col justify-between space-y-4 w-full">
+                      <div className="text-sm font-medium space-y-1">
+                        <h2 className="text-gray-900 text-lg font-large">Burger</h2>
+                        <p className="text-gray-900">$32.00</p>
+                        <p className="text-gray-700 pt-4">Description:</p>
+                        <p className="text-gray-500">Vegetable, spicy, chicken</p>
+                      </div>
+                      <div className="flex space-x-4 justify-end">
+                        <div className="flex gap-2">
+                          <select
+                            id="quantity"
+                            name="quantity"
+                            className="rounded-md border border-gray-300 text-base font-medium text-gray-700 text-left shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                          >
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                          </select>
+                          <button
+                            type="button"
+                            className="pointer-events-auto rounded-md bg-indigo-600 py-2 px-3 text-[0.8125rem] font-semibold leading-5 text-white hover:bg-indigo-500"
+                          >
+                            Add to cart
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
     );
   };
 

@@ -1,30 +1,21 @@
+import { IActiveFriends } from "../types";
 
-interface ActiveFriendsProps {
-    shareThis: () => void;
-    user: string;
-    setUser: Function;
-  }
-  function ActiveFriends({shareThis, user, setUser}:ActiveFriendsProps) { 
+  function ActiveFriends( props: IActiveFriends[]) { 
 
+    console.log('friends', props);
       return  <div className="flex justify-end">
             <h3 className="text-gray-700 pt-4">Active friends:</h3>
             <ul className="flex">
-              <li
-                title="img1"
-                className="w-11 h-11 rounded-full border-2 border-purple-200 m-1 overflow-hidden"
+
+              {/* { friends.map( (friend )=>  <li
+                
               >
-                <img src="https://i.pravatar.cc/300" />
+                {friend.name}
+                <img className="bg-red-100 w-9 h-9 rounded-full border-2 border-purple-200 m-1 overflow-hidden" src="https://i.pravatar.cc/400?img=64" />
               </li>
-              <li
-                className="w-11 h-11 rounded-full border-2 border-purple-200 m-1 overflow-hidden"
-              >
-                <img src="https://i.pravatar.cc/400?img=64" />
-              </li>
-              <li
-                className="w-11 h-11 rounded-full border-2 border-purple-200 m-1 overflow-hidden"
-              >
-                <img src="https://i.pravatar.cc/400?img=65" />
-              </li>
+              )} */}
+             
+             
             </ul>
           </div>
     
