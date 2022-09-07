@@ -5,13 +5,12 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabase";
 import { RealtimeChannel, RealtimePresence } from "@supabase/supabase-js";
 import { useRouter } from "next/router";
-import { IMenuItem } from "../components/MenuItemCard";
 import { GetStaticProps } from "next";
 import Head from "next/head";
 import ShareThisModal from "../components/ShareThisModal";
 import Avatar from "../components/Avatar";
 import InviteFriends from "../components/InviteFriends";
-import {IActiveFriends} from '../types';
+import {IActiveFriends, IMenuItem} from '../types';
 
 //https://github.com/supabase/realtime/blob/multiplayer/demo/pages/%5B...slug%5D.tsx
 export const getStaticProps: GetStaticProps = async (context) => {

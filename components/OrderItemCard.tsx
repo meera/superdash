@@ -32,7 +32,9 @@ export interface OrderItemCardProps extends IOrderItem {
                       <Image
                         src={image || 'https://placeolder'}
                         alt={name || 'PlaceHolder'}
-                        className="w-20 rounded-md"
+                        layout="fill" 
+                        objectFit="cover"
+                        className="w-20 h-20 rounded-md"
                       />
                     </div>
 

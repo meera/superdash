@@ -29,6 +29,8 @@ const ProductItemCard = ({
       <Image
         src={ image ?? "https://theburgershack.pk/upload/1652957388-WhatsApp%20Image%202022-05-19%20at%203.45.37%20PM.jpeg"}
         alt={name ?? "Food"}
+        layout="fill" 
+        objectFit="cover"
         className="flex-none w-20 h-20 object-center object-cover bg-gray-200 rounded-md"
       />
       <div className="flex flex-col justify-between space-y-4 w-full">
