@@ -5,6 +5,7 @@ export interface IOrderItem {
   orderid?: number;
   quantity: number;
   name: string | null;
+  description: string | null;
   price: number
   image: string | null;
 
@@ -19,6 +20,7 @@ export interface OrderItemCardProps extends IOrderItem {
   const OrderItemCard = ({
     id,
     name,
+    description,
     image,
     quantity,
     price,
@@ -29,13 +31,16 @@ export interface OrderItemCardProps extends IOrderItem {
 
          <li className="flex py-6 px-4 sm:px-6">
                     <div className="flex-shrink-0">
+                    <div className="w-40 h-40 relative"> 
+
                       <Image
                         src={image || 'https://placeolder'}
                         alt={name || 'PlaceHolder'}
                         layout="fill" 
                         objectFit="cover"
-                        className="w-20 h-20 rounded-md"
+                        className="rounded-md"
                       />
+                      </div>
                     </div>
 
                     <div className="ml-6 flex-1 flex flex-col">
@@ -46,11 +51,11 @@ export interface OrderItemCardProps extends IOrderItem {
                               href="#"
                               className="font-medium text-gray-700 hover:text-gray-800"
                             >
-                              Burger1
+                              {name}
                             </a>
                           </h4>
                           <p className="mt-1 text-sm text-gray-500">
-                            Vegetable, spicy, chicken
+                            {description}
                           </p>
                         </div>
 

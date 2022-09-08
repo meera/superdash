@@ -26,12 +26,13 @@ const ProductItemCard = ({
 
   return (
     <li className="flex p-4 space-x-6 border-t border-gray-200 relative border rounded-lg shadow-sm flex cursor-pointer mt-4 bg-white">
+
       <Image
         src={ image ?? "https://theburgershack.pk/upload/1652957388-WhatsApp%20Image%202022-05-19%20at%203.45.37%20PM.jpeg"}
         alt={name ?? "Food"}
-        layout="fill" 
-        objectFit="cover"
-        className="flex-none w-20 h-20 object-center object-cover bg-gray-200 rounded-md"
+        height="50px"
+        width="350px"
+        className="flex-none object-center object-cover bg-gray-200 rounded-md"
       />
       <div className="flex flex-col justify-between space-y-4 w-full">
         <div className="text-sm font-medium space-y-1">
@@ -60,7 +61,7 @@ const ProductItemCard = ({
               type="button"
               className="pointer-events-auto rounded-md bg-purple-600 py-2 px-3 text-[0.8125rem] font-semibold leading-5 text-white hover:bg-purple-500"
               onClick={() => {
-                const orderItem: IOrderItem = { id, name, quantity, image, price };
+                const orderItem: IOrderItem = { id, name, description, quantity, image, price };
                 addOrderItem(orderItem);
               }}
            >

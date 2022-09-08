@@ -11,7 +11,7 @@ interface InviteFriendsProps {
       return    <div className="flex flex-col justify-between space-y-4 w-full">
         <div className="text-sm font-medium space-y-1">
           <h2 className="text-gray-900 text-3xl font-large pt-4">
-            <span className="text-purple-600 font-bold">jOE rOGEN</span> has
+            <span className="text-purple-600 font-bold">Joe Tiger</span> has
             started a new group Food Order
           </h2>
           <div className="pt-10">
