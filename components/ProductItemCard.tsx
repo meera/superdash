@@ -46,7 +46,7 @@ const ProductItemCard = ({
             <select
               id="quantity"
               name="quantity"
-              className="rounded-md border border-gray-300 text-base font-medium text-gray-700 text-left shadow-sm focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+              className="rounded-md border border-gray-300 text-base font-medium text-gray-700 text-left shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             >
               <option value="1">1</option>
               <option value="2">2</option>
@@ -59,7 +59,7 @@ const ProductItemCard = ({
             </select>
             <button
               type="button"
-              className="pointer-events-auto rounded-md bg-purple-600 py-2 px-3 text-[0.8125rem] font-semibold leading-5 text-white hover:bg-purple-500"
+              className="pointer-events-auto rounded-md bg-blue-600 py-2 px-3 text-[0.8125rem] font-semibold leading-5 text-white hover:bg-blue-500"
               onClick={() => {
                 const orderItem: IOrderItem = { id, name, description, quantity, image, price };
                 addOrderItem(orderItem);

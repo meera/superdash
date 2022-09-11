@@ -13,7 +13,7 @@ function Avatar({ user, setUser }: AvatarProps) {
         width="150px"
         src="/meera_profile.jpeg"
         alt="A persons Avatar"
-        className="flex-none  object-center object-cover bg-gray-200 rounded-full border-4 border-purple-100"
+        className="flex-none  object-center object-cover bg-gray-200 rounded-full border-4 border-blue-100"
       />
       </div>
       <h2 className="text-center text-gray-700 text-md font-bold pt-4">

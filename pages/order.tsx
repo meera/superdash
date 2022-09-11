@@ -3,14 +3,15 @@ import OrderItemCard from "../components/OrderItemCard";
 import ProductItemCard from "../components/ProductItemCard";
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabase";
-import { RealtimeChannel, RealtimePresence } from "@supabase/supabase-js";
+import { RealtimeChannel } from "@supabase/supabase-js";
 import { useRouter } from "next/router";
 import { GetStaticProps } from "next";
 import Head from "next/head";
 import ShareThisModal from "../components/ShareThisModal";
 import Avatar from "../components/Avatar";
 import InviteFriends from "../components/InviteFriends";
-import {IActiveFriends, IMenuItem} from '../types';
+import { IActiveFriends, IMenuItem } from "../types";
+import ActiveFriends from "../components/ActiveFriends";
 
 //https://github.com/supabase/realtime/blob/multiplayer/demo/pages/%5B...slug%5D.tsx
 export const getStaticProps: GetStaticProps = async (context) => {
@@ -28,10 +29,9 @@ export const getStaticProps: GetStaticProps = async (context) => {
   };
 };
 
-const Start: React.FC = ({ menuItems} :any) => {
+const Start: React.FC = ({ menuItems }: any) => {
   const [order, setOrder] = useState<IOrderItem[]>([]);
   const router = useRouter();
-  //var channel: RealtimeChannel;
   const channelRef = useRef<RealtimeChannel | null>(null);
   const [user, setUser] = useState("Joe Doe");
   const [activeFriends, setActiveFriends] = useState<IActiveFriends[]>([]);
@@ -59,8 +59,13 @@ const Start: React.FC = ({ menuItems} :any) => {
         const newUser = newEvent.newPresences[0].user;
         //const id = newEvent.newPresence[0].id;
         console.log("keys presence", Object.keys(newEvent as Object));
+        var randomColor = Math.floor(Math.random() * 16777215).toString(16);
 
-        let newActiveFriend: IActiveFriends = { 'name':newUser, id:'foo' };
+        let newActiveFriend: IActiveFriends = {
+          name: newUser,
+          id: "foo",
+          color: randomColor,
+        };
         console.log("a new user has joined", newActiveFriend);
         setActiveFriends((oldUserArray) => [...oldUserArray, newActiveFriend]);
       })
@@ -90,10 +95,7 @@ const Start: React.FC = ({ menuItems} :any) => {
     //setOrder()
   }
 
-  const handleCheckoutOrder = (e: any) => {
-    e.preventDefault();
-    router.push("/CheckoutOrder");
-  };
+ 
 
   function shareThis() {
     setShowShareThisModal(true);
@@ -101,11 +103,11 @@ const Start: React.FC = ({ menuItems} :any) => {
   }
   const presenceChanged = (channel: RealtimeChannel) => {
     const trackedState = channelRef.current?.presence;
-    
+
     const state = trackedState?.state;
     console.log("presenceChanged", trackedState?.state);
     console.log("keys", Object.keys(state as Object));
-    
+
     Object.values(state as Object).map((userState: any) =>
       console.log("User State ", userState, "user ", userState[0].user)
     );
@@ -123,10 +125,10 @@ const Start: React.FC = ({ menuItems} :any) => {
       </Head>
       <div className="bg-gray-50">
         <main className="max-w-7xl mx-auto pt-16 pb-24 px-4 sm:px-6 lg:px-8">
-          <div className="flex p-4 space-x-6 border-2 border-purple-400 relative rounded-lg shadow-sm flex cursor-pointer bg-white">
+          <div className="flex p-4 space-x-6 border-2 border-blue-400 relative rounded-lg shadow-sm flex cursor-pointer bg-white">
             <Avatar user={user} setUser={setUser} />
             <InviteFriends shareThis={shareThis} />
-            {/* <ActiveFriends props={activeFriends}/> */}
+            <ActiveFriends color="foo" activeFriends={activeFriends} />
           </div>
 
           {/* Product and Orders */}
@@ -135,8 +137,8 @@ const Start: React.FC = ({ menuItems} :any) => {
               <div className="mt-10 lg:mt-0 pt-12">
                 {/* Product */}
                 <h2 className="text-2xl font-medium text-gray-900">
-                      Menu Items
-                    </h2>
+                  Menu Items
+                </h2>
                 <ul role="list">
                   {menuItems.map((menuItem: IMenuItem) => (
                     <ProductItemCard
@@ -150,10 +152,10 @@ const Start: React.FC = ({ menuItems} :any) => {
                     />
                   ))}
                 </ul>
-              </div>{" "}
+              </div>
               {/* End of Product Div */}
               {/* Orders */}
-              <div >
+              <div>
                 {order.length > 0 && (
                   <div className="mt-10 lg:mt-0 pt-12">
                     <h2 className="text-2xl font-medium text-gray-900">
@@ -200,8 +202,9 @@ const Start: React.FC = ({ menuItems} :any) => {
                       <div className="border-t border-gray-200 py-6 px-4 sm:px-6">
                         <button
                           type="submit"
-                          className="w-full bg-purple-600 border border-transparent rounded-md shadow-sm py-3 px-4 text-base font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-purple-500"
-                          onClick={() => router.push("/checkout")}
+                          className="w-full bg-blue-600 border border-transparent rounded-md shadow-sm py-3 px-4 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-blue-500"
+                          onClick={(e) =>     {e.preventDefault();
+                            router.push("/checkout")}}
                         >
                           Place an Order
                         </button>
@@ -209,13 +212,18 @@ const Start: React.FC = ({ menuItems} :any) => {
                     </div>
                   </div>
                 )}
-              </div>{" "}
+              </div>
               {/* End of Order Div */}
             </div>
           </div>
         </main>
       </div>
-      { showShareThisModal && <ShareThisModal show={showShareThisModal} setShow={setShowShareThisModal}/>}
+      {showShareThisModal && (
+        <ShareThisModal
+          show={showShareThisModal}
+          setShow={setShowShareThisModal}
+        />
+      )}
     </>
   );
 };

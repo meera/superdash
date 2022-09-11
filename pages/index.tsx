@@ -9,7 +9,7 @@ function Start() {
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    router.push("/start");
+    router.push("/order");
   };
 
   return (
