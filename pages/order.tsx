@@ -19,7 +19,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
   // You can use any data fetching library
 
   const { data } = await supabase.from("MenuItem").select();
-
+ 
   const resp = data;
 
   return {
@@ -33,19 +33,19 @@ const Start: React.FC = ({ menuItems }: any) => {
   const [order, setOrder] = useState<IOrderItem[]>([]);
   const router = useRouter();
   const channelRef = useRef<RealtimeChannel | null>(null);
-  const [user, setUser] = useState("Joe Doe");
   const [activeFriends, setActiveFriends] = useState<IActiveFriends[]>([]);
   const deliveryCharges = 5;
   const [total, setTotal] = useState<number>(0);
   const [subTotal, setSubTotal] = useState<number>(0);
   const [taxes, setTaxes] = useState<number>(3);
   const [showShareThisModal, setShowShareThisModal] = useState<boolean>(false);
+  const user = router.query.name || 'John Doe' ; 
 
   function removeOrderItem(id: number) {
     order.filter((item) => item.id !== id);
   }
   useEffect(() => {
-    const channel = supabase.channel("meera11", {
+    const channel = supabase.channel("online-users", {
       configs: {
         broadcast: { ack: true },
       },
@@ -87,11 +87,10 @@ const Start: React.FC = ({ menuItems }: any) => {
 
   function addOrderItem(orderItem: IOrderItem) {
     console.log("inside add ", channelRef.current, "order ", order);
-    //channelRef.current?.track({ order: "new value", user: user });
+    channelRef.current?.track({ order: order, user: user });
     setTotal(total + orderItem.price + deliveryCharges + taxes);
     setSubTotal(total + orderItem.price);
     setOrder((existingItem) => [...existingItem, orderItem]);
-
     //setOrder()
   }
 
@@ -101,7 +100,9 @@ const Start: React.FC = ({ menuItems }: any) => {
     setShowShareThisModal(true);
     console.log("share this");
   }
+  // This is call back.
   const presenceChanged = (channel: RealtimeChannel) => {
+    console.log( 'PrESENCE cHANGED ', channel);
     const trackedState = channelRef.current?.presence;
 
     const state = trackedState?.state;
@@ -126,15 +127,15 @@ const Start: React.FC = ({ menuItems }: any) => {
       <div className="bg-gray-50">
         <main className="max-w-7xl mx-auto pt-16 pb-24 px-4 sm:px-6 lg:px-8">
           <div className="flex p-4 space-x-6 border-2 border-blue-400 relative rounded-lg shadow-sm flex cursor-pointer bg-white">
-            <Avatar user={user} setUser={setUser} />
+            <Avatar user={user} />
             <InviteFriends shareThis={shareThis} />
             <ActiveFriends color="foo" activeFriends={activeFriends} />
           </div>
 
           {/* Product and Orders */}
           <div className="max-w-2xl mx-auto lg:max-w-none">
-            <div className="lg:grid lg:grid-cols-2 lg:gap-x-12 xl:gap-x-16">
-              <div className="mt-10 lg:mt-0 pt-12">
+            <div className="lg:grid grid-cols-3 lg:gap-x-12 xl:gap-x-16">
+              <div className="mt-10 lg:mt-0 pt-12 col-span-2">
                 {/* Product */}
                 <h2 className="text-2xl font-medium text-gray-900">
                   Menu Items
@@ -155,7 +156,7 @@ const Start: React.FC = ({ menuItems }: any) => {
               </div>
               {/* End of Product Div */}
               {/* Orders */}
-              <div>
+              <div className="col-span-1">
                 {order.length > 0 && (
                   <div className="mt-10 lg:mt-0 pt-12">
                     <h2 className="text-2xl font-medium text-gray-900">

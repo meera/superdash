@@ -2,9 +2,8 @@ import Image from 'next/image'
 
 interface AvatarProps {
   user: string;
-  setUser: Function;
 }
-function Avatar({ user, setUser }: AvatarProps) {
+function Avatar({ user }: AvatarProps) {
   return (
     <div className="flex flex-col justify-center px-10">
       <div className="w-40 h-40 relative"> 
