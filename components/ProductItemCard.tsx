@@ -1,4 +1,4 @@
-import { IOrderItem } from "./OrderItemCard";
+import { IOrderItem } from "../types";
 import { useState, useEffect } from "react";
 import Image from 'next/image'
 
@@ -47,6 +47,7 @@ const ProductItemCard = ({
               id="quantity"
               name="quantity"
               className="rounded-md border border-gray-300 text-base font-medium text-gray-700 text-left shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              onChange={ (e) => setQuantity(parseInt(e.target.value))}
             >
               <option value="1">1</option>
               <option value="2">2</option>

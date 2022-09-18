@@ -6,8 +6,9 @@ import { useState} from "react";
 export interface ShareThisModalProp {
  show: boolean;
  setShow: Function;
+ url: string
 }
-export default function ShareThisModal({show, setShow}:ShareThisModalProp ) {
+export default function ShareThisModal({show, setShow, url}:ShareThisModalProp ) {
 
     function onClick() {
         navigator.clipboard.writeText('inclick');
@@ -33,6 +34,7 @@ export default function ShareThisModal({show, setShow}:ShareThisModalProp ) {
           <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
                 Send this link to your friends.
           </p>
+          <p> {url} </p>
         </div>
       </Modal.Body>
       <Modal.Footer>

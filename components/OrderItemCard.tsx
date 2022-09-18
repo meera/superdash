@@ -1,15 +1,5 @@
 import Image from 'next/image'
-
-export interface IOrderItem {
-  id: number;
-  orderid?: number;
-  quantity: number;
-  name: string | null;
-  description: string | null;
-  price: number
-  image: string | null;
-
-}
+import {IOrderItem} from '../types';
 
 export interface OrderItemCardProps extends IOrderItem {
     removeOrderItem: (id: number) => void;
@@ -54,15 +44,16 @@ export interface OrderItemCardProps extends IOrderItem {
                               {name}
                             </a>
                           </h4>
-                          <p className="mt-1 text-sm text-gray-500">
+                          {/* <p className="mt-1 text-sm text-gray-500">
                             {description}
-                          </p>
+                          </p> */}
                         </div>
 
                         <div className="ml-4 flex-shrink-0 flow-root">
                           <button
                             type="button"
                             className="-m-2.5 bg-white p-2.5 flex items-center justify-center text-gray-400 hover:text-gray-500"
+                            onClick= {() => removeOrderItem(id)}
                           >
                             <span className="sr-only">Remove</span>
                             {/* <!-- Heroicon name: solid/trash --> */}

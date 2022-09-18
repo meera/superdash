@@ -1,13 +1,24 @@
 import { Button, Card } from "flowbite-react";
 import { useRouter } from "next/router";
+import {useState } from "react";
 
 function Join() {
   const router = useRouter();
-  const { orderId } = router.query;
+  const [name, setName] = useState("YourName");
+  const [error, setError] = useState(false);
+  const sessionId = router.query.session ? (router.query.session as string) : "NewSession";
+  const user = router.query.name ? (router.query.name as string) : "John Doe";
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    router.push("/");
+    router.push({
+      pathname: "/order",
+      query: {
+        name: name,
+        join: true,
+        sessionId: sessionId
+      },
+    });
   };
 
   return (
@@ -15,12 +26,32 @@ function Join() {
       <div className="m-auto">
         <Card>
           <h5 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-            Joe Tiger has started new food order!
+           {user} has started new food order!
           </h5>
           <p className="font-normal text-gray-700 dark:text-gray-400">
-            Your friend Joe has invited you to order food with him.
+            Your friend {user} has invited you to order food with him.
           </p>
-          <Button onClick={handleSubmit}>
+          
+
+          <form>
+            <label className="pb-10">
+            Enter your name to Join {user}&apos; Order:
+              <input
+                type="text"
+                name="name"
+                placeholder="Enter your name to Join the Order"
+                value={name}
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                onChange={(event) => {
+                  setName(event.target.value);
+                }}
+              />
+            </label>
+            <div className="pt-10">
+              {error && (
+                <div className="text-orange-600	"> Enter Your Name </div>
+              )}
+              <Button onClick={handleSubmit}>
             Join Food Order Session
             <svg
               className="ml-2 -mr-1 h-4 w-4"
@@ -35,6 +66,8 @@ function Join() {
               />
             </svg>
           </Button>
+            </div>
+          </form>
         </Card>
       </div>
     </div>

@@ -4,7 +4,6 @@ import { useState } from "react";
 
 function Start() {
   const router = useRouter();
-  const { orderId } = router.query;
   const [name, setName] = useState("Meera");
   const [error, setError] = useState(false);
 

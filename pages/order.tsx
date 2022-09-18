@@ -1,4 +1,3 @@
-import { IOrderItem } from "../components/OrderItemCard";
 import OrderItemCard from "../components/OrderItemCard";
 import ProductItemCard from "../components/ProductItemCard";
 import { useState, useEffect, useRef } from "react";
@@ -10,8 +9,10 @@ import Head from "next/head";
 import ShareThisModal from "../components/ShareThisModal";
 import Avatar from "../components/Avatar";
 import InviteFriends from "../components/InviteFriends";
-import { IActiveFriends, IMenuItem } from "../types";
-import ActiveFriends from "../components/ActiveFriends";
+import { IActiveUser, IMenuItem, IOrder, IOrderItem } from "../types";
+import ActiveUsers from "../components/ActiveUsers";
+import { blue } from "@mui/material/colors";
+import {makeid} from "../lib/utils";
 
 //https://github.com/supabase/realtime/blob/multiplayer/demo/pages/%5B...slug%5D.tsx
 export const getStaticProps: GetStaticProps = async (context) => {
@@ -19,8 +20,6 @@ export const getStaticProps: GetStaticProps = async (context) => {
   // You can use any data fetching library
 
   const { data } = await supabase.from("MenuItem").select();
- 
-  const resp = data;
 
   return {
     props: {
@@ -30,89 +29,127 @@ export const getStaticProps: GetStaticProps = async (context) => {
 };
 
 const Start: React.FC = ({ menuItems }: any) => {
-  const [order, setOrder] = useState<IOrderItem[]>([]);
+  const initOrder : IOrder = { 
+    orderItems: [],
+    total: 0,
+    subTotal: 0,
+    taxes: 6,
+    deliveryCharges: 5
+  }
+  const [order, setOrder] = useState<IOrder>(initOrder);
   const router = useRouter();
-  const channelRef = useRef<RealtimeChannel | null>(null);
-  const [activeFriends, setActiveFriends] = useState<IActiveFriends[]>([]);
-  const deliveryCharges = 5;
-  const [total, setTotal] = useState<number>(0);
-  const [subTotal, setSubTotal] = useState<number>(0);
-  const [taxes, setTaxes] = useState<number>(3);
+  const [activeUsers, setActiveUsers] = useState<IActiveUser[]>([]);
   const [showShareThisModal, setShowShareThisModal] = useState<boolean>(false);
-  const user = router.query.name || 'John Doe' ; 
+  const user = router.query.name ? (router.query.name as string) : "John Doe";
+  const join = router.query.join ? true : false;
+  const session = router.query.session ? (router.query.name as string) : "NewSession";
+
+  const channel_broadcast_order = useRef<RealtimeChannel>();
+  const url_to_share = useRef<string>('');
 
   function removeOrderItem(id: number) {
-    order.filter((item) => item.id !== id);
+    console.log(' remove ' , id);
+    const newOrderItems = order.orderItems.filter((item) => item.id !== id);
+    console.log(' new order ' ,newOrderItems);
+    setOrder((existingOrder) => {
+
+      existingOrder.orderItems = order.orderItems.filter((item) => item.id !== id);
+      return existingOrder;
+    });
   }
+
+  async function addOrderItem(orderItem: IOrderItem) {
+    console.log( ' add order ', orderItem);
+
+    setOrder((existingOrder) => {
+      existingOrder.subTotal = existingOrder.subTotal +    orderItem.price;
+      existingOrder.total =  existingOrder.subTotal + existingOrder.taxes + existingOrder.deliveryCharges; 
+      existingOrder.orderItems = [...existingOrder.orderItems, orderItem]
+      return existingOrder;
+    });
+      
+    const status = await channel_broadcast_order.current?.send({
+      type: "broadcast",
+      event: "order-update",
+      updated_order: { x: Math.random(), y: Math.random() },
+    });
+    console.log(" Broadcast Send ", status);
+  }
+
   useEffect(() => {
-    const channel = supabase.channel("online-users", {
+    if (!router.isReady) return;
+
+
+    
+    // Check if user like to join a session or create a new session
+     
+    const channelName = join ? session : makeid(8);
+    console.log("inside effect channel " , ' join ' , join, 'session ', session, 'channel', channelName);
+
+    const channel_online_users = supabase.channel(channelName);
+    url_to_share.current = 'https://localhost:3000?join=true&sessionId=' + channelName;
+    channel_online_users
+      .on("presence", { event: "sync" }, () => {
+        console.log(
+          "currently online users",
+          channel_online_users.presenceState()
+        );
+        const presentState = channel_online_users.presenceState();
+        const keys = Object.keys(presentState);
+
+        const presentUsers: IActiveUser[] = [];
+
+        keys.map((key) => {
+          const activeUser = {} as IActiveUser;
+
+          activeUser.name = presentState[key][0].user_name;
+          activeUser.id = key;
+          presentUsers.push(activeUser);
+        });
+        setActiveUsers(presentUsers);
+      })
+
+      .subscribe(async (status: any) => {
+        if (status === "SUBSCRIBED") {
+          const status = await channel_online_users.track({ user_name: user });
+          console.log(status);
+        }
+      });
+
+    channel_broadcast_order.current = supabase.channel("user-order-update", {
       configs: {
         broadcast: { ack: true },
       },
     });
 
-    channel
-      .on("presence", { event: "sync" }, () => presenceChanged(channel))
-      .on("presence", { event: "join" }, (newEvent: any) => {
-        console.log("a new user has joined", newEvent.newPresence);
+    channel_broadcast_order.current.subscribe(async (status: any) => {
+      if (status === "SUBSCRIBED") {
+        // now you can start broadcasting messages
+        // sending a new message every second
 
-        const newUser = newEvent.newPresences[0].user;
-        //const id = newEvent.newPresence[0].id;
-        console.log("keys presence", Object.keys(newEvent as Object));
-        var randomColor = Math.floor(Math.random() * 16777215).toString(16);
+        console.log(
+          " Broad cast ",
+          status,
+          "channel ",
+          channel_broadcast_order
+        );
+      }
+    });
 
-        let newActiveFriend: IActiveFriends = {
-          name: newUser,
-          id: "foo",
-          color: randomColor,
-        };
-        console.log("a new user has joined", newActiveFriend);
-        setActiveFriends((oldUserArray) => [...oldUserArray, newActiveFriend]);
-      })
-      .on("presence", { event: "leave" }, ({ leftUser }: any) =>
-        console.log("a user has left", leftUser)
-      )
-      .subscribe((status: string) => {
-        if (status === "SUBSCRIBED") {
-          channel.track({ order: "124", user: user });
-          channelRef.current = channel;
-          console.log("subscribed ", status);
-        }
-        console.log("status ", status);
-      });
-    return () => {
-      channel.unsubscribe();
-    };
-  }, [user]);
-
-  function addOrderItem(orderItem: IOrderItem) {
-    console.log("inside add ", channelRef.current, "order ", order);
-    channelRef.current?.track({ order: order, user: user });
-    setTotal(total + orderItem.price + deliveryCharges + taxes);
-    setSubTotal(total + orderItem.price);
-    setOrder((existingItem) => [...existingItem, orderItem]);
-    //setOrder()
-  }
-
- 
+    channel_broadcast_order.current.on(
+      "broadcast",
+      { event: "order-update" },
+      (updated_order: any) => {
+        // TODO Update the Order State
+        console.log("Broad cast receibed", updated_order);
+      }
+    );
+  }, [router.isReady, user]);
 
   function shareThis() {
     setShowShareThisModal(true);
     console.log("share this");
   }
-  // This is call back.
-  const presenceChanged = (channel: RealtimeChannel) => {
-    console.log( 'PrESENCE cHANGED ', channel);
-    const trackedState = channelRef.current?.presence;
-
-    const state = trackedState?.state;
-    console.log("presenceChanged", trackedState?.state);
-    console.log("keys", Object.keys(state as Object));
-
-    Object.values(state as Object).map((userState: any) =>
-      console.log("User State ", userState, "user ", userState[0].user)
-    );
-  };
 
   return (
     <>
@@ -127,9 +164,10 @@ const Start: React.FC = ({ menuItems }: any) => {
       <div className="bg-gray-50">
         <main className="max-w-7xl mx-auto pt-16 pb-24 px-4 sm:px-6 lg:px-8">
           <div className="flex p-4 space-x-6 border-2 border-blue-400 relative rounded-lg shadow-sm flex cursor-pointer bg-white">
-            <Avatar user={user} />
-            <InviteFriends shareThis={shareThis} />
-            <ActiveFriends color="foo" activeFriends={activeFriends} />
+            { join? <div> Joined! </div> :
+             <><Avatar user={user}/> <InviteFriends shareThis={shareThis} /></> }
+            
+            <ActiveUsers color="foo" activeusers={activeUsers} />
           </div>
 
           {/* Product and Orders */}
@@ -157,7 +195,7 @@ const Start: React.FC = ({ menuItems }: any) => {
               {/* End of Product Div */}
               {/* Orders */}
               <div className="col-span-1">
-                {order.length > 0 && (
+                {order.orderItems.length > 0 && (
                   <div className="mt-10 lg:mt-0 pt-12">
                     <h2 className="text-2xl font-medium text-gray-900">
                       Order summary
@@ -165,7 +203,7 @@ const Start: React.FC = ({ menuItems }: any) => {
                     <div className="mt-4 bg-white border border-gray-200 rounded-lg shadow-sm">
                       <h3 className="sr-only">Items in your cart</h3>
                       <ul role="list" className="divide-y divide-gray-200">
-                        {order.map((order: IOrderItem, index) => (
+                        {order.orderItems.map((order: IOrderItem, index) => (
                           <OrderItemCard
                             key={index}
                             {...order}
@@ -177,25 +215,25 @@ const Start: React.FC = ({ menuItems }: any) => {
                         <div className="flex items-center justify-between">
                           <dt className="text-sm">Subtotal</dt>
                           <dd className="text-sm font-medium text-gray-900">
-                            ${subTotal}
+                            ${order.subTotal}
                           </dd>
                         </div>
                         <div className="flex items-center justify-between">
                           <dt className="text-sm">Delivery Charges</dt>
                           <dd className="text-sm font-medium text-gray-900">
-                            ${deliveryCharges}
+                            ${order.deliveryCharges}
                           </dd>
                         </div>
                         <div className="flex items-center justify-between">
                           <dt className="text-sm">Taxes</dt>
                           <dd className="text-sm font-medium text-gray-900">
-                            ${taxes}
+                            ${order.taxes}
                           </dd>
                         </div>
                         <div className="flex items-center justify-between border-t border-gray-200 pt-6">
                           <dt className="text-base font-medium">Total</dt>
                           <dd className="text-base font-medium text-gray-900">
-                            ${total}
+                            ${order.total}
                           </dd>
                         </div>
                       </dl>
@@ -204,8 +242,10 @@ const Start: React.FC = ({ menuItems }: any) => {
                         <button
                           type="submit"
                           className="w-full bg-blue-600 border border-transparent rounded-md shadow-sm py-3 px-4 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-blue-500"
-                          onClick={(e) =>     {e.preventDefault();
-                            router.push("/checkout")}}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            router.push("/checkout");
+                          }}
                         >
                           Place an Order
                         </button>
@@ -223,6 +263,7 @@ const Start: React.FC = ({ menuItems }: any) => {
         <ShareThisModal
           show={showShareThisModal}
           setShow={setShowShareThisModal}
+          url={url_to_share.current}
         />
       )}
     </>
