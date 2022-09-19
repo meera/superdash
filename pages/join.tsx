@@ -6,17 +6,23 @@ function Join() {
   const router = useRouter();
   const [name, setName] = useState("YourName");
   const [error, setError] = useState(false);
-  const sessionId = router.query.session ? (router.query.session as string) : "NewSession";
+  const channelId = router.query.channelId ? (router.query.channelId as string) : "NewSession";
   const user = router.query.name ? (router.query.name as string) : "John Doe";
+    console.log(' channel id' , channelId);
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
+
+    if (name.length === 0) {
+      setError(true);
+      return;
+    }
     router.push({
       pathname: "/order",
       query: {
         name: name,
+        channelId: channelId,
         join: true,
-        sessionId: sessionId
       },
     });
   };
@@ -29,7 +35,7 @@ function Join() {
            {user} has started new food order!
           </h5>
           <p className="font-normal text-gray-700 dark:text-gray-400">
-            Your friend {user} has invited you to order food with him.
+            AYour friend {user} has invited you to order food with him.
           </p>
           
 

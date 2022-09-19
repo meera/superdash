@@ -4,12 +4,12 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabase";
 import { RealtimeChannel } from "@supabase/supabase-js";
 import { useRouter } from "next/router";
-import { GetStaticProps } from "next";
+import { GetStaticProps, GetServerSideProps } from "next";
 import Head from "next/head";
 import ShareThisModal from "../components/ShareThisModal";
 import Avatar from "../components/Avatar";
 import InviteFriends from "../components/InviteFriends";
-import { IActiveUser, IMenuItem, IOrder, IOrderItem } from "../types";
+import { IActiveUser, IMenuItem, IOrder, IOrderItem } from "../types/types";
 import ActiveUsers from "../components/ActiveUsers";
 import { blue } from "@mui/material/colors";
 import {makeid} from "../lib/utils";
@@ -24,11 +24,12 @@ export const getStaticProps: GetStaticProps = async (context) => {
   return {
     props: {
       menuItems: data,
+      host: process.env['HOST'] || null 
     },
   };
 };
 
-const Start: React.FC = ({ menuItems }: any) => {
+const Start: React.FC = ({ menuItems, host }: any) => {
   const initOrder : IOrder = { 
     orderItems: [],
     total: 0,
@@ -42,31 +43,49 @@ const Start: React.FC = ({ menuItems }: any) => {
   const [showShareThisModal, setShowShareThisModal] = useState<boolean>(false);
   const user = router.query.name ? (router.query.name as string) : "John Doe";
   const join = router.query.join ? true : false;
-  const session = router.query.session ? (router.query.name as string) : "NewSession";
+  const channelId = router.query.channelId ? (router.query.channelId as string) : "UnnamedChannel";
 
   const channel_broadcast_order = useRef<RealtimeChannel>();
   const url_to_share = useRef<string>('');
+  console.log({ basePath: router.basePath}); 
 
   function removeOrderItem(id: number) {
     console.log(' remove ' , id);
-    const newOrderItems = order.orderItems.filter((item) => item.id !== id);
-    console.log(' new order ' ,newOrderItems);
-    setOrder((existingOrder) => {
 
-      existingOrder.orderItems = order.orderItems.filter((item) => item.id !== id);
-      return existingOrder;
-    });
+    const orderItem =  order.orderItems.find((item) => item.id === id);
+
+    if (orderItem === undefined) {
+      console.log(' Something went wrong ' , id);
+
+      return;
+    }
+    const newOrder = { ...order }; 
+    newOrder.subTotal = order.subTotal - orderItem.price;
+    newOrder.deliveryCharges= 6;
+    newOrder.taxes = newOrder.subTotal *.8;
+    newOrder.total = order.subTotal +  newOrder.deliveryCharges + newOrder.taxes;
+    
+    // Remove the order from the list
+    newOrder.orderItems =  order.orderItems.filter((item) => item.id !== id);
+
+    //newOrder.total = order.total - orderItem.price;
+    setOrder(newOrder);
+
+  
   }
 
   async function addOrderItem(orderItem: IOrderItem) {
-    console.log( ' add order ', orderItem);
 
-    setOrder((existingOrder) => {
-      existingOrder.subTotal = existingOrder.subTotal +    orderItem.price;
-      existingOrder.total =  existingOrder.subTotal + existingOrder.taxes + existingOrder.deliveryCharges; 
-      existingOrder.orderItems = [...existingOrder.orderItems, orderItem]
-      return existingOrder;
-    });
+    order.orderItems = [...order.orderItems, orderItem]
+
+    const newOrder = { ...order }; 
+    newOrder.subTotal = order.subTotal + orderItem.price;
+    newOrder.deliveryCharges= 6;
+    newOrder.taxes = newOrder.subTotal *.8;
+    newOrder.total = order.subTotal +  newOrder.deliveryCharges + newOrder.taxes;
+    setOrder(newOrder);
+
+   
       
     const status = await channel_broadcast_order.current?.send({
       type: "broadcast",
@@ -81,13 +100,13 @@ const Start: React.FC = ({ menuItems }: any) => {
 
 
     
-    // Check if user like to join a session or create a new session
+    // Check if user like to join a existing Channel or create a new session
      
-    const channelName = join ? session : makeid(8);
-    console.log("inside effect channel " , ' join ' , join, 'session ', session, 'channel', channelName);
+    const channel_Id = join ? channelId : makeid(8);
+    console.log("inside effect channel " , ' join ' , join, 'session ', channelId, 'channel', channelId);
 
-    const channel_online_users = supabase.channel(channelName);
-    url_to_share.current = 'https://localhost:3000?join=true&sessionId=' + channelName;
+    const channel_online_users = supabase.channel(channel_Id);
+    url_to_share.current = host + '/join' + '?name=' + user + '&channelId=' + channel_Id;
     channel_online_users
       .on("presence", { event: "sync" }, () => {
         console.log(
@@ -146,9 +165,8 @@ const Start: React.FC = ({ menuItems }: any) => {
     );
   }, [router.isReady, user]);
 
-  function shareThis() {
+  function show_shareThisDialog() {
     setShowShareThisModal(true);
-    console.log("share this");
   }
 
   return (
@@ -165,7 +183,7 @@ const Start: React.FC = ({ menuItems }: any) => {
         <main className="max-w-7xl mx-auto pt-16 pb-24 px-4 sm:px-6 lg:px-8">
           <div className="flex p-4 space-x-6 border-2 border-blue-400 relative rounded-lg shadow-sm flex cursor-pointer bg-white">
             { join? <div> Joined! </div> :
-             <><Avatar user={user}/> <InviteFriends shareThis={shareThis} /></> }
+             <><Avatar user={user}/> <InviteFriends name={user} shareThis={show_shareThisDialog} /></> }
             
             <ActiveUsers color="foo" activeusers={activeUsers} />
           </div>

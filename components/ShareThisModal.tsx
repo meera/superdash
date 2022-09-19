@@ -11,7 +11,7 @@ export interface ShareThisModalProp {
 export default function ShareThisModal({show, setShow, url}:ShareThisModalProp ) {
 
     function onClick() {
-        navigator.clipboard.writeText('inclick');
+        navigator.clipboard.writeText(url);
         setShow(false);
     }
     function onClose() {

@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import {IOrderItem} from '../types';
+import {IOrderItem} from '../types/types';
 
 export interface OrderItemCardProps extends IOrderItem {
     removeOrderItem: (id: number) => void;
