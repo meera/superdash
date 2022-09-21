@@ -69,6 +69,12 @@ const Start: React.FC = ({ menuItems, host }: any) => {
     newOrder.orderItems =  order.orderItems.filter((item) => item.id !== id);
 
     //newOrder.total = order.total - orderItem.price;
+
+    channel_broadcast_order.current?.send({
+      type: "broadcast",
+      event: "order",
+      order: newOrder,
+    });
     setOrder(newOrder);
 
   
@@ -89,8 +95,8 @@ const Start: React.FC = ({ menuItems, host }: any) => {
       
     const status = await channel_broadcast_order.current?.send({
       type: "broadcast",
-      event: "order-update",
-      updated_order: { x: Math.random(), y: Math.random() },
+      event: "order",
+      order: newOrder,
     });
     console.log(" Broadcast Send ", status);
   }
@@ -117,15 +123,28 @@ const Start: React.FC = ({ menuItems, host }: any) => {
         const keys = Object.keys(presentState);
 
         const presentUsers: IActiveUser[] = [];
-
+        
+       
         keys.map((key) => {
           const activeUser = {} as IActiveUser;
 
           activeUser.name = presentState[key][0].user_name;
+          
           activeUser.id = key;
           presentUsers.push(activeUser);
         });
+        
         setActiveUsers(presentUsers);
+      })
+      .on('presence', { event: 'join' }, () => {
+       
+        if(!join) {
+          channel_broadcast_order.current?.send({
+          type: "broadcast",
+          event: "order",
+          order: order,
+        });
+      }
       })
 
       .subscribe(async (status: any) => {
@@ -135,12 +154,14 @@ const Start: React.FC = ({ menuItems, host }: any) => {
         }
       });
 
-    channel_broadcast_order.current = supabase.channel("user-order-update", {
+    const channel = supabase.channel("user-order-update", {
       configs: {
         broadcast: { ack: true },
       },
     });
 
+    channel_broadcast_order.current = channel;
+    
     channel_broadcast_order.current.subscribe(async (status: any) => {
       if (status === "SUBSCRIBED") {
         // now you can start broadcasting messages
@@ -152,6 +173,8 @@ const Start: React.FC = ({ menuItems, host }: any) => {
           "channel ",
           channel_broadcast_order
         );
+
+        
       }
     });
 
@@ -163,6 +186,18 @@ const Start: React.FC = ({ menuItems, host }: any) => {
         console.log("Broad cast receibed", updated_order);
       }
     );
+
+    channel_broadcast_order.current.on(
+      "broadcast",
+      { event: "order" },
+      (updated_order: any) => {
+        // TODO Update the Order State
+        console.log("Broad cast Order ** Received", updated_order);
+        setOrder( updated_order.order);
+      }
+    );
+
+    
   }, [router.isReady, user]);
 
   function show_shareThisDialog() {

@@ -7,7 +7,7 @@ interface ActiveUsersProps {
 }
 function ActiveUsers({ activeusers }: ActiveUsersProps) {
   const divStyle = {
-    'background-color': 'coral',
+    'backgroundColor': 'coral',
     width: '40px',
     height: '40px'
   };
