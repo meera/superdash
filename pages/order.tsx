@@ -4,152 +4,107 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabase";
 import { RealtimeChannel } from "@supabase/supabase-js";
 import { useRouter } from "next/router";
-import { GetStaticProps, GetServerSideProps } from "next";
+import { GetStaticProps } from "next";
 import Head from "next/head";
-import ShareThisModal from "../components/ShareThisModal";
 import Avatar from "../components/Avatar";
 import InviteFriends from "../components/InviteFriends";
 import { IActiveUser, IMenuItem, IOrder, IOrderItem } from "../types/types";
 import ActiveUsers from "../components/ActiveUsers";
 import { blue } from "@mui/material/colors";
-import {makeid} from "../lib/utils";
+import { makeid } from "../lib/utils";
 
 //https://github.com/supabase/realtime/blob/multiplayer/demo/pages/%5B...slug%5D.tsx
 export const getStaticProps: GetStaticProps = async (context) => {
-  // Call an external API endpoint to get posts.
-  // You can use any data fetching library
+
 
   const { data } = await supabase.from("MenuItem").select();
 
   return {
     props: {
       menuItems: data,
-      host: process.env['HOST'] || null 
+      host: process.env["HOST"] || null,
     },
   };
 };
 
 const Start: React.FC = ({ menuItems, host }: any) => {
-  const initOrder : IOrder = { 
+  const initOrder: IOrder = {
     orderItems: [],
     total: 0,
     subTotal: 0,
     taxes: 6,
-    deliveryCharges: 5
-  }
+    deliveryCharges: 5,
+  };
   const [order, setOrder] = useState<IOrder>(initOrder);
   const router = useRouter();
   const [activeUsers, setActiveUsers] = useState<IActiveUser[]>([]);
-  const [showShareThisModal, setShowShareThisModal] = useState<boolean>(false);
   const user = router.query.name ? (router.query.name as string) : "John Doe";
   const join = router.query.join ? true : false;
-  const channelId = router.query.channelId ? (router.query.channelId as string) : "UnnamedChannel";
+  const channelId = router.query.channelId
+    ? (router.query.channelId as string)
+    : "UnnamedChannel";
+  const randomColor = Math.floor(Math.random() * 16777215).toString(16);
 
   const channel_broadcast_order = useRef<RealtimeChannel>();
-  const url_to_share = useRef<string>('');
-  console.log({ basePath: router.basePath}); 
+  const url_to_share = useRef<string>("");
 
-  function removeOrderItem(id: number) {
-    console.log(' remove ' , id);
-
-    const orderItem =  order.orderItems.find((item) => item.id === id);
-
-    if (orderItem === undefined) {
-      console.log(' Something went wrong ' , id);
-
-      return;
-    }
-    const newOrder = { ...order }; 
-    newOrder.subTotal = order.subTotal - orderItem.price;
-    newOrder.deliveryCharges= 6;
-    newOrder.taxes = newOrder.subTotal *.8;
-    newOrder.total = order.subTotal +  newOrder.deliveryCharges + newOrder.taxes;
-    
-    // Remove the order from the list
-    newOrder.orderItems =  order.orderItems.filter((item) => item.id !== id);
-
-    //newOrder.total = order.total - orderItem.price;
-
-    channel_broadcast_order.current?.send({
-      type: "broadcast",
-      event: "order",
-      order: newOrder,
-    });
-    setOrder(newOrder);
-
-  
-  }
-
-  async function addOrderItem(orderItem: IOrderItem) {
-
-    order.orderItems = [...order.orderItems, orderItem]
-
-    const newOrder = { ...order }; 
-    newOrder.subTotal = order.subTotal + orderItem.price;
-    newOrder.deliveryCharges= 6;
-    newOrder.taxes = newOrder.subTotal *.8;
-    newOrder.total = order.subTotal +  newOrder.deliveryCharges + newOrder.taxes;
-    setOrder(newOrder);
-
-   
-      
-    const status = await channel_broadcast_order.current?.send({
-      type: "broadcast",
-      event: "order",
-      order: newOrder,
-    });
-    console.log(" Broadcast Send ", status);
-  }
 
   useEffect(() => {
     if (!router.isReady) return;
 
-
-    
     // Check if user like to join a existing Channel or create a new session
-     
+
     const channel_Id = join ? channelId : makeid(8);
-    console.log("inside effect channel " , ' join ' , join, 'session ', channelId, 'channel', channelId);
+    console.log(
+      "inside effect channel ",
+      " join ",
+      join,
+      "session ",
+      channelId,
+      "channel",
+      channelId,
+      " Color ",
+      randomColor
+    );
 
     const channel_online_users = supabase.channel(channel_Id);
-    url_to_share.current = host + '/join' + '?name=' + user + '&channelId=' + channel_Id;
+    url_to_share.current =
+      host + "/join" + "?name=" + user + "&channelId=" + channel_Id;
     channel_online_users
       .on("presence", { event: "sync" }, () => {
-        console.log(
-          "currently online users",
-          channel_online_users.presenceState()
-        );
         const presentState = channel_online_users.presenceState();
         const keys = Object.keys(presentState);
 
         const presentUsers: IActiveUser[] = [];
-        
-       
+
         keys.map((key) => {
           const activeUser = {} as IActiveUser;
 
-          activeUser.name = presentState[key][0].user_name;
-          
           activeUser.id = key;
+          activeUser.name = presentState[key][0].user_name;
+          activeUser.color = presentState[key][0].color;
+
           presentUsers.push(activeUser);
         });
-        
+
         setActiveUsers(presentUsers);
       })
-      .on('presence', { event: 'join' }, () => {
-       
-        if(!join) {
+      .on("presence", { event: "join" }, () => {
+        if (!join) {
           channel_broadcast_order.current?.send({
-          type: "broadcast",
-          event: "order",
-          order: order,
-        });
-      }
+            type: "broadcast",
+            event: "order",
+            order: order,
+          });
+        }
       })
 
       .subscribe(async (status: any) => {
         if (status === "SUBSCRIBED") {
-          const status = await channel_online_users.track({ user_name: user });
+          const status = await channel_online_users.track({
+            user_name: user,
+            color: randomColor,
+          });
           console.log(status);
         }
       });
@@ -161,20 +116,10 @@ const Start: React.FC = ({ menuItems, host }: any) => {
     });
 
     channel_broadcast_order.current = channel;
-    
+
     channel_broadcast_order.current.subscribe(async (status: any) => {
       if (status === "SUBSCRIBED") {
-        // now you can start broadcasting messages
-        // sending a new message every second
-
-        console.log(
-          " Broad cast ",
-          status,
-          "channel ",
-          channel_broadcast_order
-        );
-
-        
+        // broadcast
       }
     });
 
@@ -193,15 +138,53 @@ const Start: React.FC = ({ menuItems, host }: any) => {
       (updated_order: any) => {
         // TODO Update the Order State
         console.log("Broad cast Order ** Received", updated_order);
-        setOrder( updated_order.order);
+        setOrder(updated_order.order);
       }
     );
-
-    
   }, [router.isReady, user]);
 
-  function show_shareThisDialog() {
-    setShowShareThisModal(true);
+
+  function removeOrderItem(id: number) {
+    const orderItem = order.orderItems.find((item) => item.id === id);
+
+    if (orderItem === undefined) {
+      console.log(" Something went wrong ", id);
+
+      return;
+    }
+    const newOrder = { ...order };
+    newOrder.subTotal = order.subTotal - orderItem.price;
+    newOrder.deliveryCharges = 6;
+    newOrder.taxes = Number((newOrder.subTotal * 0.8).toFixed(2));
+    newOrder.total = order.subTotal + newOrder.deliveryCharges + newOrder.taxes;
+
+    // Remove the order from the list
+    newOrder.orderItems = order.orderItems.filter((item) => item.id !== id);
+
+    channel_broadcast_order.current?.send({
+      type: "broadcast",
+      event: "order",
+      order: newOrder,
+    });
+    setOrder(newOrder);
+  }
+
+  async function addOrderItem(orderItem: IOrderItem) {
+    order.orderItems = [...order.orderItems, orderItem];
+
+    const newOrder = { ...order };
+    newOrder.subTotal = order.subTotal + orderItem.price;
+    newOrder.deliveryCharges = 6;
+    newOrder.taxes = Number((newOrder.subTotal * 0.8).toFixed(2));
+    newOrder.total = order.subTotal + newOrder.deliveryCharges + newOrder.taxes;
+    setOrder(newOrder);
+
+    const status = await channel_broadcast_order.current?.send({
+      type: "broadcast",
+      event: "order",
+      order: newOrder,
+    });
+    console.log(" Broadcast Send ", status);
   }
 
   return (
@@ -217,10 +200,16 @@ const Start: React.FC = ({ menuItems, host }: any) => {
       <div className="bg-gray-50">
         <main className="max-w-7xl mx-auto pt-16 pb-24 px-4 sm:px-6 lg:px-8">
           <div className="flex p-4 space-x-6 border-2 border-blue-400 relative rounded-lg shadow-sm flex cursor-pointer bg-white">
-            { join? <div> Joined! </div> :
-             <><Avatar user={user}/> <InviteFriends name={user} shareThis={show_shareThisDialog} /></> }
-            
-            <ActiveUsers color="foo" activeusers={activeUsers} />
+            {join ? (
+              <div> Joined! </div>
+            ) : (
+              <>
+                <Avatar user={user} />{" "}
+                <InviteFriends name={user} url={url_to_share.current} />
+              </>
+            )}
+
+            <ActiveUsers activeusers={activeUsers} />
           </div>
 
           {/* Product and Orders */}
@@ -312,13 +301,6 @@ const Start: React.FC = ({ menuItems, host }: any) => {
           </div>
         </main>
       </div>
-      {showShareThisModal && (
-        <ShareThisModal
-          show={showShareThisModal}
-          setShow={setShowShareThisModal}
-          url={url_to_share.current}
-        />
-      )}
     </>
   );
 };

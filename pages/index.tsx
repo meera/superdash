@@ -4,7 +4,7 @@ import { useState } from "react";
 
 function Start() {
   const router = useRouter();
-  const [name, setName] = useState("Meera");
+  const [name, setName] = useState("HostName");
   const [error, setError] = useState(false);
 
   const handleSubmit = (e: any) => {

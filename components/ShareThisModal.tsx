@@ -4,24 +4,21 @@ import { useState} from "react";
 
 
 export interface ShareThisModalProp {
- show: boolean;
- setShow: Function;
+ onClose: Function;
  url: string
 }
-export default function ShareThisModal({show, setShow, url}:ShareThisModalProp ) {
+export default function ShareThisModal({url, onClose}:ShareThisModalProp ) {
 
-    function onClick() {
-        navigator.clipboard.writeText(url);
-        setShow(false);
-    }
-    function onClose() {
-       setShow(false);
-    }
+   
+  function onClick() {
+          navigator.clipboard.writeText(url);
+            onClose();
+        }
+       
     return (<>
     
     <Modal
-      show={show}
-      onClose={onClose}
+     show={true}
     >
       <Modal.Header>
         Send Invite to Join this session
@@ -38,7 +35,7 @@ export default function ShareThisModal({show, setShow, url}:ShareThisModalProp )
         </div>
       </Modal.Body>
       <Modal.Footer>
-        <Button onClick={onClick}>
+        <Button onClick={() => onClick()}>
           Copy to Clipboard
         </Button>
         
