@@ -10,7 +10,6 @@ import Avatar from "../components/Avatar";
 import InviteFriends from "../components/InviteFriends";
 import { IActiveUser, IMenuItem, IOrder, IOrderItem } from "../types/types";
 import ActiveUsers from "../components/ActiveUsers";
-import { blue } from "@mui/material/colors";
 import { makeid } from "../lib/utils";
 
 //https://github.com/supabase/realtime/blob/multiplayer/demo/pages/%5B...slug%5D.tsx
@@ -27,7 +26,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
   };
 };
 
-const Start: React.FC = ({ menuItems, host }: any) => {
+const Order: React.FC = ({ menuItems, host }: any) => {
   const initOrder: IOrder = {
     orderItems: [],
     total: 0,
@@ -52,20 +51,10 @@ const Start: React.FC = ({ menuItems, host }: any) => {
   useEffect(() => {
     if (!router.isReady) return;
 
-    // Check if user like to join a existing Channel or create a new session
+    // Check if user is joining a existing Channel or creating a new session
 
     const channel_Id = join ? channelId : makeid(8);
-    console.log(
-      "inside effect channel ",
-      " join ",
-      join,
-      "session ",
-      channelId,
-      "channel",
-      channelId,
-      " Color ",
-      randomColor
-    );
+   
 
     const channel_online_users = supabase.channel(channel_Id);
     url_to_share.current =
@@ -305,4 +294,4 @@ const Start: React.FC = ({ menuItems, host }: any) => {
   );
 };
 
-export default Start;
+export default Order;

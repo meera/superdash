@@ -26,7 +26,6 @@ function InviteFriends({ name, url }: InviteFriendsProps) {
           </button>
         </div>
       </div>
-        <div> Hi</div>
        {showShareThisModal &&  <ShareThisModal
           onClose={() => setShowShareThisModal(false)}
           url={url}
