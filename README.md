@@ -14,6 +14,9 @@ A user can start a new food order. They can invite their friend, family, or coll
 [ >>> SEE SUPERDASH DEMO <<<](https://sd.askus.how/) 
   
 
+[![Watch the video](https://raw.githubusercontent.com/meera/superdash/main/public/SuperDash-Demo-Thumbnail.png)](https://youtu.be/a2MiIWR7FUs)
+
+
 ## Getting Started
 
 First, run the development server:
